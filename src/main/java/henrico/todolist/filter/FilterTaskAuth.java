@@ -39,13 +39,15 @@ public class FilterTaskAuth extends OncePerRequestFilter {
 
             // Validar usuario
             UserModel user = this.userRepository.findByUsername(username);
-            if (user == null)
-                    response.sendError(401);
+            if (user == null){
+                response.sendError(401);
+            }
             else{
                 // Validar senha
                 var passwordVerify = BCrypt.verifyer().verify(password.toCharArray(), user.getPassword());
-                if(!passwordVerify.verified)
+                if(!passwordVerify.verified){
                     response.sendError(401);
+                }
                 else{ // Segue viagem
                     request.setAttribute("idUser", user.getId());
                     filterChain.doFilter(request, response);

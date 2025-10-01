@@ -20,7 +20,7 @@ public class TaskController {
     @PostMapping("/")
     public TaskModel create(@RequestBody TaskModel taskModel, HttpServletRequest request){
         var idUser = request.getAttribute("idUser");
-        taskModel.setId((UUID) idUser);
+        taskModel.setIdUser((UUID) idUser);
         var task = this.taskRepository.save(taskModel);
         return task;
     }
