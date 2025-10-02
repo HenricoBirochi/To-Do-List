@@ -27,7 +27,7 @@ public class FilterTaskAuth extends OncePerRequestFilter {
 
         // Verifica o path da requisicao para evitar que a criacao de novos usuarios seja impedida
         String servletPath = request.getServletPath();
-        if(servletPath.equals("/tasks/")){
+        if(servletPath.startsWith("/tasks/")) {
             // Pegar a autenticacao (usuario e senha)
             String authorization = request.getHeader("Authorization");
             String authEncoded = authorization.substring(5).trim(); // O "trim()" tira todos os espacos(se tiver espaco(s)) no comeco da palavra
