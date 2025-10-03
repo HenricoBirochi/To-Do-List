@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import henrico.todolist.utils.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +41,7 @@ public class TaskController {
             .body("A data final tem que ser maior que a data de início da tarefa");
 
         var task = this.taskRepository.save(taskModel);
-        return ResponseEntity.status(200).body(task);
+        return ResponseEntity.status(201).body(task);
     }
 
     @GetMapping("/all")
@@ -51,24 +52,21 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity updateTask(@RequestBody TaskModel taskModel, 
-    @PathVariable UUID id, HttpServletRequest request) {
+    public ResponseEntity updateTask(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
 
-        // Pega o idUser para fazer a relacao de task com user pelo filtro, onde essa variavel foi setada de acordo com o username e o password
+        var task = this.taskRepository.findById(id).orElse(null);
+
+        if (task == null)
+            return ResponseEntity.status(404).body("Essa tarefa nao existe");
+
         var idUser = request.getAttribute("idUser");
 
-        // Verifica se a task existe pelo id da task recebido no path da url
-        var task = this.taskRepository.findById(id);
-        if(task == null)
-            return ResponseEntity.status(401).body("Task nao encontrada");
+        if (!task.getIdUser().equals(idUser))
+            return ResponseEntity.status(401).body("O usuario nao tem permissao para alterar essa tarefa");
 
-        var createdAt = task.getCreatedAt();
+        Utils.copyNonNullProperties(taskModel, task);
 
-        taskModel.setCreatedAt(createdAt);
-        taskModel.setIdUser((UUID) idUser);
-        taskModel.setId(id);
-
-        TaskModel updatedTask = this.taskRepository.save(taskModel);
+        TaskModel updatedTask = this.taskRepository.save(task);
         return ResponseEntity.status(200).body(updatedTask);
     }
 }
