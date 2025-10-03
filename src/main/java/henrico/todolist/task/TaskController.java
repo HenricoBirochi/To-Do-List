@@ -59,7 +59,7 @@ public class TaskController {
     @PathVariable UUID id, HttpServletRequest request) {
         var idUser = request.getAttribute("idUser");
 
-        var task = this.taskRepository.getReferenceById(id);
+        var task = this.taskRepository.findById(id);
         var createdAt = task.getCreatedAt();
         taskModel.setCreatedAt(createdAt);
         
