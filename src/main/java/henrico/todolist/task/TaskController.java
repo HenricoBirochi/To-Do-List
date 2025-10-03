@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,10 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
-
-
 
 @RestController
 @RequestMapping("/tasks")
@@ -55,16 +51,24 @@ public class TaskController {
     }
 
     @PutMapping("/{id}")
-    public TaskModel updateTask(@RequestBody TaskModel taskModel, 
+    public ResponseEntity updateTask(@RequestBody TaskModel taskModel, 
     @PathVariable UUID id, HttpServletRequest request) {
+
+        // Pega o idUser para fazer a relacao de task com user pelo filtro, onde essa variavel foi setada de acordo com o username e o password
         var idUser = request.getAttribute("idUser");
 
+        // Verifica se a task existe pelo id da task recebido no path da url
         var task = this.taskRepository.findById(id);
+        if(task == null)
+            return ResponseEntity.status(401).body("Task nao encontrada");
+
         var createdAt = task.getCreatedAt();
+
         taskModel.setCreatedAt(createdAt);
-        
         taskModel.setIdUser((UUID) idUser);
         taskModel.setId(id);
-        return this.taskRepository.save(taskModel);
+
+        TaskModel updatedTask = this.taskRepository.save(taskModel);
+        return ResponseEntity.status(200).body(updatedTask);
     }
 }
